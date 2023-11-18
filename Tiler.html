@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>My Webpage</title>
+
+        <style>
+            .single { 
+                background-color: red;  
+            }
+            .double-height {
+                background-color: rgb(0, 255, 225);
+            }
+            .double-width {
+                background-color: rgb(38, 0, 255);
+            }
+            .double-both {
+                background-color: rgb(21, 255, 0);
+            }
+            #container {
+                display:grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                /* grid-template-columns: repeat(5, auto); */
+                grid-auto-rows: 180px;
+                gap: 20px;
+                background-color: #bbbcbc;
+                width:80%
+            }
+            
+        </style>
+
+    </head>
+    <body>
+
+        <h1>Hello, world!</h1>
+        <div id="container">
+            <div id="cell0"> a </div>
+            <div id="cell1"> a </div>
+            <div id="cell2"> b </div>   
+            <div id="cell3"> c </div>
+            <div id="cell4"> d </div>
+            <div id="cell5"> e </div>
+            <div id="cell6"> f </div>
+            <div id="cell7"> g </div>
+            <div id="cell8"> h </div>
+            <div id="cell9"> i </div>
+            <div id="cell10"> j </div>
+            <div id="cell11"> k </div>
+            <div id="cell12"> l </div>
+            <div id="cell13"> m </div>
+            <div id="cell14"> n </div>
+            <div id="cell15"> o </div>
+            <div id="cell16"> p </div>
+            <div id="cell17"> q </div>
+            <div id="cell18"> r </div>
+            <div id="cell19"> s </div>
+            <div id="cell20"> t </div>
+            <div id="cell21"> u </div>
+            <div id="cell22"> v </div>
+            <div id="cell23"> w </div>
+            <div id="cell24"> x </div>
+
+
+        </div>
+
+        <script>
+
+            const tiles = [
+                { type: 'single' },
+                { type: 'single' },
+                { type: 'double-both' },
+                { type: 'single' },
+                { type: 'double-height' },
+                { type: 'single' },
+                { type: 'double-width' },
+                { type: 'double-height' },
+                { type: 'double-width' },
+                { type: 'single' },
+                { type: 'single' },
+                { type: 'single' },
+                { type: 'double-width' },
+                { type: 'single' },
+            ];
+
+            function debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            };
+
+            function Jiggle_tiles(tileCollection, ContainerName) {
+
+                const tileDimensions = {
+                    'single':       { w: 0, h: 0 },
+                    'double-width': { w: 1, h: 0 },
+                    'double-height':{ w: 0, h: 1 },
+                    'double-both':  { w: 1, h: 1 }
+                };
+
+                // build a list of tile positions with headroom for double tiles
+                const positionMap = Array.from({ length: 200 }, (_, index) => index);
+                const gridContainer = document.getElementById(ContainerName);
+                gridContainer.querySelectorAll('*').forEach(element => {
+                    element.className = "";   // remove all the classes from the cells in the container
+                }); 
+
+                 // figure out the rows 
+                const computedStyles = window.getComputedStyle(gridContainer);  // Get the computed styles of the grid container
+                let cols = computedStyles.gridTemplateColumns.split(' ').length; // Extract the number of columns from the "grid-template-columns" property
+                console.log("working with: " + cols + " columns");
+            
+                tileCollection.forEach(tile => {
+                    let thiscell = -1; // the starting cell
+                    let placed = false; // lets assume we wont place it 
+                    do {
+                        thiscell++;
+                        // find the next available cell we use the offset so we can seep through as we start from the first one each time
+                        thiscell = positionMap.find((element, index) => element !== "x" && index >= thiscell);
+                        // get the x,y width and height of the tile
+                        const x = (thiscell % cols) + 1;  
+                        const y = (parseInt(thiscell / cols) ) + 1;
+                        const { w, h } = tileDimensions[tile.type];
+                    
+                        //test all the cells this may hit - note if the cell is single and on the right edge we dont need to test the right side
+                        placed = check_space (positionMap, thiscell, cols, h, w) 
+                        if (placed) {
+                            // find the cell in the container with an id equal to "cellnn" with nn beign thiscell number
+                            let cellId = "cell" + thiscell;
+                            console.log("placing " + tile.type + " at " + thiscell + " in cell " + cellId);
+                            let gridCell = document.getElementById(cellId);
+                            gridCell.className = tile.type;
+                            gridCell.style.gridArea   = y + "/" + x + "/" + (y+h+1) + "/" + (x+w+1) ;  
+                        } 
+                    } while (!placed);
+                });
+
+                function check_space (positionMap, thiscell, cols, h, w) {
+                    if ((w === 0 || thiscell % cols !== cols - 1) &&  positionMap[thiscell + w] !== "x" && 
+                        positionMap[ thiscell + (cols * h)] !== "x" &&  positionMap[thiscell + (cols * h) + w] !== "x") {
+                        // so all the cells are clear so lets fill them up as placement is OK 
+                        positionMap[thiscell]     = "x";
+                        positionMap[(thiscell+w)] = "x";
+                        positionMap[(thiscell+(cols*h))]     = "x";
+                        positionMap[(thiscell+(cols*h))+(w)] = "x";
+                        return true;    
+                    } else {
+                        return false;
+                    }
+                }
+            }
+
+           Jiggle_tiles(tiles, "container");
+
+            window.addEventListener('resize', debounce(function(event) {
+                console.log("resized");
+                Jiggle_tiles( tiles, "container");
+            }, 500), true);
+
+
+        </script>
+    </body>
+</html>
