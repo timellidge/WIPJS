@@ -8,7 +8,7 @@
                 background-color: red;  
             }
             .double-height {
-                background-color: rgb(0, 255, 225);
+                background-color: rgb(255, 247, 0);
             }
             .double-width {
                 background-color: rgb(38, 0, 255);
@@ -20,14 +20,15 @@
                 display:grid;
                 grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
                 /* grid-template-columns: repeat(5, auto); */
-                grid-auto-rows: 180px;
+                grid-auto-rows: minmax(180px, auto);
                 gap: 20px;
                 background-color: #bbbcbc;
                 min-width:160px;
+                grid-auto-flow: dense;
             }
 
             #container .gridcelldefault {
-                background-color: aqua;
+                background-color: rgb(193, 203, 203);
                 border : 1px solid black;
             }
             
@@ -64,8 +65,6 @@
             <div class = "gridcelldefault" id="cell23"> w </div>
             <div class = "gridcelldefault" id="cell24"> x </div>
             <div class = "gridcelldefault" id="cell25"> z </div>
-
-
         </div>
 
         <script>
@@ -97,22 +96,24 @@
                 };
 
                 // build a list of tile positions with headroom for double tiles
-                const positionMap = Array.from({ length: 200 }, (_, index) => index);
-                const gridContainer = document.getElementById(ContainerName);
+                let positionMap = new Array(tileCollection.length*4);
+                positionMap.fill(true);
 
-                // clear all the cell grid areas that have been set
+                const gridContainer = document.getElementById(ContainerName);
+  
+                // clear all the cell grid areas and debug content
                 gridContainer.querySelectorAll('*').forEach(element => {
                     element.style.gridArea = "";   // remove all the classes from the cells in the container
+                    element.className = "";
+                    element.textContent = ""; 
                 }); 
+
+                console.log(positionMap);
 
                  // figure out the rows 
                 const computedStyles = window.getComputedStyle(gridContainer);  // Get the computed styles of the grid container
                 console.log(computedStyles.width);
                 let cols = computedStyles.gridTemplateColumns.split(' ').length; // Extract the number of columns from the "grid-template-columns" property
-                let cq = Math.floor(parseInt(computedStyles.width)/(160+20));
-
-                //cols = cq;
-                console.log("working with: " + cols + " columns - calccols" , cq);
             
                 tileCollection.forEach(tile => {
                     let thiscell = -1; // the starting cell
@@ -120,37 +121,40 @@
                     do {
                         thiscell++;
                         // find the next available cell we use the offset so we can seep through as we start from the first one each time
-                        thiscell = positionMap.find((element, index) => element !== "x" && index >= thiscell);
+                        thiscell = positionMap.findIndex((element, index) => element === true && index >= thiscell);
 
                         let { w, h } = tileDimensions[tile.type];
                         if(cols === 1){w=0}
                     
                         //test all the cells this may hit - note if the cell is single and on the right edge we dont need to test the right side
-                        if ((w === 0 || thiscell % cols !== cols - 1) &&  positionMap[thiscell + w] !== "x" && 
-                            positionMap[ thiscell + (cols * h)] !== "x" &&  positionMap[thiscell + (cols * h) + w] !== "x") {
-                            // so all the cells are clear so lets fill them up as placement is OK 
+                        if ((w === 0 || thiscell % cols !== cols - 1) &&  positionMap[thiscell + w]  && 
+                                  positionMap[ thiscell + (cols * h)] &&  positionMap[thiscell + (cols * h) + w] ) {
 
-                            // get the x,y of the tile top left so we can get the grid start
+                            // now mark the cell we will use as taken (false) so we can - IT may set the cell to false 4 times but that is ok as its fast
+                            positionMap[thiscell]     = false;
+                            positionMap[(thiscell+w)] = false;
+                            positionMap[(thiscell+(cols*h))]     = false;
+                            positionMap[(thiscell+(cols*h))+(w)] = false;
+
+                            // get the x,y of the tile top left so we can get the grid start note grid numbers start from 1 
                             const x = (thiscell % cols) + 1;  
                             const y = (parseInt(thiscell / cols) ) + 1;
 
-                            // find the cell in the container with an id equal to "cellnn" with nn beign thiscell number
+                            // wont be needed in the proper web part because we will have a cell for each tile
                             let cellId = "cell" + thiscell;
-                            //console.log("placing " + tile.type + " at " + thiscell + " in cell " + cellId);
                             let gridCell = document.getElementById(cellId);
+
+                            // set the grid area and the class
                             gridCell.className = tile.type;
                             gridCell.style.gridArea   = y + "/" + x + "/" + (y+h+1) + "/" + (x+w+1) ;  
-                            gridCell.textContent = tile.type + " " + w + " " +h;
-                            positionMap[thiscell]     = "x";
-                            positionMap[(thiscell+w)] = "x";
-                            positionMap[(thiscell+(cols*h))]     = "x";
-                            positionMap[(thiscell+(cols*h))+(w)] = "x";
-                            placed = true;    
+                            gridCell.textContent = cellId + " " + tile.type + " " + w + " " +h;
+                            //console.log("placing " + tile.type + " at " + thiscell + " in cell " + cellId);
+                            
+                            placed = true;   
                         } else {
                             placed = false;
                         }
-
-
+                        console.log(positionMap);
                     } while (!placed);
                 });
             }
