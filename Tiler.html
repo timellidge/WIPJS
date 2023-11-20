@@ -31,13 +31,46 @@
                 background-color: rgb(193, 203, 203);
                 border : 1px solid black;
             }
-            
+
+
+            .centered-div {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                height: 100px; /* Set your desired height */
+                width: 200px; /* Set your desired width */
+                border: 1px solid #ccc; /* Optional: Add a border for better visualization */
+                overflow: hidden;
+                position: relative;
+                font-size: 1.2em;
+                line-height: 1.2em;
+                max-height: 2.4em; /* Maximum 2 lines */
+            }
+
+.centered-div:Hover {
+  font-size: smaller;
+}
+
+.centered-div::after {
+  content: "...";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  background: white;
+  padding-left: 10px;
+}
+
+
+
         </style>
 
     </head>
     <body>
 
         <h1>Hello, world!</h1>
+        <div class="centered-div">
+            Your text goes here. If it's too long, it will show an ellipsis.
+          </div>
         <div id="container">
             <div class = "gridcelldefault" id="cell0"> a-1 </div>
             <div class = "gridcelldefault" id="cell1"> a </div>
@@ -118,14 +151,13 @@
                 tileCollection.forEach(tile => {
                     let thiscell = -1; // the starting cell
                     let placed = false; // lets assume we wont place it 
+                    let { w, h } = tileDimensions[tile.type];
+                    if(cols === 1){w=0}
                     do {
                         thiscell++;
                         // find the next available cell we use the offset so we can seep through as we start from the first one each time
                         thiscell = positionMap.findIndex((element, index) => element === true && index >= thiscell);
 
-                        let { w, h } = tileDimensions[tile.type];
-                        if(cols === 1){w=0}
-                    
                         //test all the cells this may hit - note if the cell is single and on the right edge we dont need to test the right side
                         if ((w === 0 || thiscell % cols !== cols - 1) &&  positionMap[thiscell + w]  && 
                                   positionMap[ thiscell + (cols * h)] &&  positionMap[thiscell + (cols * h) + w] ) {

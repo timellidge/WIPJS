@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My Webpage</title>
+
+    <style>
+      .single {
+        background-color: red;
+      }
+      .double-height {
+        background-color: rgb(255, 247, 0);
+        grid-row: span 2;
+      }
+      .double-width {
+        background-color: rgb(38, 0, 255);
+        grid-column: span 2;
+      }
+      .double-both {
+        background-color: rgb(21, 255, 0);
+        grid-column: span 2;
+        grid-row: span 2;
+      }
+      #container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        /* grid-template-columns: repeat(5, auto); */
+        grid-auto-rows: minmax(180px, auto);
+        gap: 20px;
+        background-color: #bbbcbc;
+        min-width: 160px;
+        grid-auto-flow: dense;
+      }
+
+      #container .gridcelldefault {
+        background-color: rgb(193, 203, 203);
+        border: 1px solid black;
+      }
+
+
+    </style>
+  </head>
+  <body>
+    <h1>Tim is nice (but rubbish at css)</h1>
+   
+    <div id="container">
+      <div class="gridcelldefault" id="cell0">a-1</div>
+      <div class="gridcelldefault" id="cell1">a</div>
+      <div class="gridcelldefault" id="cell2">b</div>
+      <div class="gridcelldefault" id="cell3">c</div>
+      <div class="gridcelldefault" id="cell4">d</div>
+      <div class="gridcelldefault" id="cell5">e</div>
+      <div class="gridcelldefault" id="cell6">f</div>
+      <div class="gridcelldefault" id="cell7">g</div>
+      <div class="gridcelldefault" id="cell8">h</div>
+      <div class="gridcelldefault" id="cell9">i</div>
+      <div class="gridcelldefault" id="cell10">j</div>
+      <div class="gridcelldefault" id="cell11">k</div>
+      <div class="gridcelldefault" id="cell12">l</div>
+      <div class="gridcelldefault" id="cell13">m</div>
+      <div class="gridcelldefault" id="cell14">n</div>
+      <div class="gridcelldefault" id="cell15">o</div>
+      <div class="gridcelldefault" id="cell16">p</div>
+      <div class="gridcelldefault" id="cell17">q</div>
+      <div class="gridcelldefault" id="cell18">r</div>
+      <div class="gridcelldefault" id="cell19">s</div>
+      <div class="gridcelldefault" id="cell20">t</div>
+      <div class="gridcelldefault" id="cell21">u</div>
+      <div class="gridcelldefault" id="cell22">v</div>
+      <div class="gridcelldefault" id="cell23">w</div>
+      <div class="gridcelldefault" id="cell24">x</div>
+      <div class="gridcelldefault" id="cell25">z</div>
+    </div>
+
+    <script>
+      const tiles = [
+        { type: "single" },
+        { type: "single" },
+        { type: "double-both" },
+        { type: "single" },
+        { type: "double-height" },
+        { type: "single" },
+        { type: "double-width" },
+        { type: "double-height" },
+        { type: "double-width" },
+        { type: "single" },
+        { type: "double-both" },
+        { type: "single" },
+        { type: "double-width" },
+        { type: "single" },
+      ];
+      let thiscell = 0;
+      tiles.forEach((tile) => {
+       
+        let cellId = "cell" + thiscell;
+        let gridCell = document.getElementById(cellId);
+
+        // set the grid area and the class
+        gridCell.className = tile.type;
+       // gridCell.style.gridArea =
+        //  y + "/" + x + "/" + (y + h + 1) + "/" + (x + w + 1);
+        gridCell.textContent = cellId + " " + tile.type;
+
+        thiscell++;
+      });
+    </script>
+  </body>
+</html>
